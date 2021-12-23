@@ -1,0 +1,80 @@
+#include <iostream>
+#include <algorithm>
+#include <set>
+ 
+using namespace std;
+ 
+const long long MOD = 1e9 + 9;
+const long long P = 231;
+ 
+template<class T>
+struct Mod {
+     T x;
+     Mod(T x = 0): x(x) {}
+     Mod operator+(Mod other) {
+         return (x + other.x) % MOD;
+     }
+     Mod operator-(Mod other) {
+         if (x < other.x)
+             return (x + MOD - other.x) % MOD;
+         return (x - other.x) % MOD;
+     }
+     Mod operator*(Mod other) {
+         return (x * other.x) % MOD;
+     }
+ 
+     friend Mod operator+(int x, Mod other) {
+         return other + x;
+     }
+};
+ 
+const int N = 5001;
+Mod<long long> h[N], h_rev[N];
+Mod<long long> deg[N];
+ 
+bool is_pal(int l, int r, int n) {
+    auto x = (h[r] - (l == 0 ? 0 : h[l - 1])) * deg[n - l]; // hash * deg[l + n - l]
+    auto y = (h_rev[n - 1 - l] - (r == n - 1 ? 0 : h[n - 1 - r - 1])) * deg[1 + r]; // hash * deg[n - 1 - r]
+    return x.x == y.x;
+}
+ 
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    
+ 
+    string s;
+    cin >> s;
+ 
+    for (int i = 0; i < s.size(); ++i) {
+        if (i == 0) {
+            deg[0] = 1;
+            h[i] = s[i];
+        }
+        else {
+            deg[i] = deg[i - 1] * P;
+            h[i] = h[i - 1] + deg[i] * s[i];
+        }
+    }
+ 
+    deg[s.size()] = deg[s.size() - 1] * P;
+ 
+    reverse(s.begin(), s.end());
+    for (int i = 0; i < s.size(); ++i) {
+        if (i == 0) {
+            h_rev[i] = s[i];
+        }
+        else {
+            h_rev[i] = h_rev[i - 1] + deg[i] * s[i];
+        }
+    }
+ 
+    int q;
+    cin >> q;
+    while (q--) {
+        int l, r;
+        cin >> l >> r;
+        --l, --r;
+        cout << is_pal(l, r, s.size()) << '\n';
+    }
+}
